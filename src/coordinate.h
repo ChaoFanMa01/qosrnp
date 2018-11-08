@@ -8,6 +8,13 @@
 #include "header.h"
 
 namespace qosrnp {
+    // data type predeclarations.
+    class Coordinate;
+
+    // function predeclarations.
+    coordinate_type distance(const Coordinate&, const Coordinate&);
+    std::ostream& operator<<(std::ostream&, const Coordinate&);
+
     class Coordinate {
     public:
         Coordinate(const coordinate_type&, const coordinate_type&, 

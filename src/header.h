@@ -7,11 +7,11 @@ namespace qosrnp {
     /* data type of coordinate */
     typedef double        coordinate_type;
     /* data type of ID */
-    typedef uint16_t      id_type;
+    typedef int32_t       id_type;
     /* data type of hop count */
-    typedef uint16_t       hop_type;
+    typedef int32_t       hop_type;
     /* data type of node degree */
-    typedef uint16_t       degree_type;
+    typedef int32_t       degree_type;
     /* data type of wireless link quality */
     typedef double        quality_type;
 

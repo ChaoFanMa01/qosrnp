@@ -21,6 +21,8 @@ namespace qosrnp {
 
     // function predeclarations.
     coordinate_type distance(const Node&, const Node&);
+    std::ostream& operator<<(std::ostream&, const Node&);
+    bool is_neighbor(const Node&, const Node&);
 
     /* @class Node
      *
@@ -146,6 +148,13 @@ namespace qosrnp {
         ~Sink() = default;
     };
 
+    /* @fn Nodes
+     *
+     * A vector of Nodes.
+     * The main purpose of this class is to ensure the 
+     * allocated memory will be safely released in case 
+     * accidents.
+     */
     class Nodes {
     public:
         typedef std::vector<Node*>::value_type     value_type;
@@ -175,6 +184,16 @@ namespace qosrnp {
     private:
         std::vector<Node*> nodes;
     };
+
+    /* @fn is_neighbor()
+     *
+     * TODO this function is used to judge whether
+     * two nodes are neighbors in a graph.
+     */
+    bool
+    is_neighbor(const Node& n1, const Node& n2) {
+        return distance(n1, n2) <= 10.0;
+    }
 }
 
 #endif
