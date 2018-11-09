@@ -1,10 +1,10 @@
 #include <iostream>
 #include <random>
 #include <ctime>
+#include <vector>
 
 #include "../src/header.h"
-#include "../src/node.h"
-#include "../src/graph.h"
+#include "../src/graph_misc.h"
 #include "../src/mysql_api.h"
 
 std::uniform_real_distribution<double> d(0.0, 100.0);
@@ -65,13 +65,12 @@ int main() {
             nodes.push_back(random_node(qosrnp::node_type::SENSOR));
         else
             nodes.push_back(random_node(qosrnp::node_type::RELAY));
-
+    
     qosrnp::AdjacencyList<qosrnp::Node> al(nodes.begin(), nodes.end());
 
-    if (!mysql.write_adjacency_list(al))
+    if (!mysql.write_adjacency_list(qosrnp::dijkstra_spt(al, 0, std::vector<qosrnp::size_type>{1, 2, 3, 4, 5, 6, 7, 8, 9, 10})))
         std::cout << "mysql error!" << std::endl;
     else
         std::cout << "mysql done." << std::endl;
-
     return 0;
 }

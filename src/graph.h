@@ -185,7 +185,7 @@ namespace qosrnp {
     const id_type Vertex<C>::DEFAULT_PARENT = -1;
     
     template <class C>
-    const typename Vertex<C>::weight_type Vertex<C>::DEFAULT_WEIGHT = -1.0;
+    const typename Vertex<C>::weight_type Vertex<C>::DEFAULT_WEIGHT = 9999;
 
     template <class C>
     Vertex<C>::Vertex(const Vertex& v)
@@ -268,6 +268,7 @@ namespace qosrnp {
         iterator       end() noexcept { return vertices.end(); }
         const_iterator end() const noexcept { return vertices.end(); }
 
+        void push_back(const Vertex<C>& v) { vertices.push_back(v); }
         void clear() { vertices.clear(); }
 
         size_type size() const { return vertices.size(); }
@@ -289,10 +290,11 @@ namespace qosrnp {
         // add edges for each vertex.
         for (size_type i = 0; i < vertices.size(); ++i)
             for (size_type j = 0; j < vertices.size(); ++j)
-                if (is_neighbor(*vertices[i].node(), 
-                                *vertices[j].node()))
+                if (i != j && is_neighbor(*vertices[i].node(), 
+                                          *vertices[j].node())) {
                     vertices[i].push_neighbor(Edge<C>(&vertices[i],
                                                       &vertices[j]));
+                }
     }
 
     template <class C>

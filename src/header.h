@@ -1,6 +1,7 @@
 #ifndef _QOSRNP_HEADER_H
 #define _QOSRNP_HEADER_H
 
+#include <cstdlib>
 #include <cstdint>      // uintx_t
 
 namespace qosrnp {
@@ -14,6 +15,8 @@ namespace qosrnp {
     typedef int32_t       degree_type;
     /* data type of wireless link quality */
     typedef double        quality_type;
+    /* data type of size */
+    typedef size_t        size_type;
 
     /* constraint on node degree */
     const degree_type     DEGREE_CONSTRAINT    = 10;
