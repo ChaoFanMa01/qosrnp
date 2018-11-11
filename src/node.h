@@ -53,6 +53,7 @@ namespace qosrnp {
         void set_y(const coordinate_type& y) { _coordinate.set_y(y); }
         void set_z(const coordinate_type& z) { _coordinate.set_z(z); }
         void set_power(const power_type& p) { _power = p; }
+        void set_hop(const hop_type& h) { _hop = h; }
 
         bool operator==(const Node& n) const { return _id == n._id; }
         bool operator!=(const Node& n) const { return !(*this == n); }
@@ -192,7 +193,12 @@ namespace qosrnp {
      */
     bool
     is_neighbor(const Node& n1, const Node& n2) {
-        return distance(n1, n2) <= 10.0;
+        if (n1.id() != n2.id()) {
+            coordinate_type dis = distance(n1, n2);
+            if (dis <= n1.power() && dis <= n2.power())
+                return true;
+        }
+        return false;
     }
 }
 
