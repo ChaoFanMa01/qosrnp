@@ -6,6 +6,7 @@
 #include <utility>
 #include <initializer_list>
 
+#include "header.h"
 #include "miscellaneous.h"
 
 namespace qosrnp {
@@ -48,10 +49,21 @@ namespace qosrnp {
         // search a minimum set cover of _set field using _family field,
         // using the greedy algorithm.
         std::set<key_type> minimum_set_cover() const;
+        // search a minimum k-set cover of _set field using _family field,
+        // using the greedy algorithm.
+        std::set<key_type> k_set_cover(const size_type&);
 
     private:
         // return the key of the set with maximal size from given family.
         key_type max_set(std::map<key_type, std::set<value_type>>&) const;
+        // makde a k cover.
+        bool make_k_cover(std::map<key_type, std::set<value_type>>&, const key_type&, const size_type&) const;
+        // find all the elements only covered by a set with given key.
+        std::set<value_type> necessary_elements(std::map<key_type, std::set<value_type>>&, const key_type&) const;
+        // find all the elements that not covered only by a set with given key.
+        std::set<value_type> optional_elements(std::map<key_type, std::set<value_type>>&, const key_type&) const;
+        // check whether an element is only covered by given set.
+        bool is_necessary(std::map<key_type, std::set<value_type>>&, const key_type&, const value_type&) const;
 
     private:
         std::map<key_type, std::set<value_type>>    _family;
@@ -145,7 +157,8 @@ namespace qosrnp {
     template <typename T, typename K>
     std::set<T>
     Cover<T,K>::minimum_set_cover() const {
-        std::set<T>                mi, tmp_s = _set;
+        std::set<T>                mi;
+        std::set<K>                tmp_s = _set;
         std::map<T, std::set<K>>   tmp_f = _family;
         T                          m;
 
@@ -173,6 +186,112 @@ namespace qosrnp {
             }
         }
         return mi;
+    }
+
+    template <typename T, typename K>
+    std::set<T>
+    Cover<T,K>::k_set_cover(const size_type& k) {
+        std::set<T>                  mi;
+        std::set<K>                  tmp_s = _set;
+        std::map<T, std::set<K>>     tmp_f = _family;
+        T                            m;
+
+        while (!tmp_s.empty()) {
+            m = max_set(tmp_f);
+            // make this set covers no more k elements.
+            // If we cannot make this successfully, i.e.,
+            // the number of elements covered only by this
+            // set is larger than k, an empty set is returned
+            // to notify that there is no feasible solution
+            // to this instance.
+            if (!make_k_cover(tmp_f, m, k)) {
+                mi.clear();
+                return mi;
+            }
+            
+            for (auto &f : _family)
+                if (f.first != m)
+                    for (auto &e : tmp_f[m])
+                        f.second.erase(e);
+
+            for (auto &e : tmp_f[m])
+                tmp_s.erase(e);
+            // delete each covered element from remaining cover sets.
+            for (auto &f : tmp_f)
+                if (f.first != m)
+                    for (auto &e : tmp_f[m])
+                        f.second.erase(e);
+            // delete this max set from family.
+            tmp_f.erase(m);
+            // record this max set in the result.
+            mi.insert(m);
+            // if the whole family cannot guarantee a fully set cover,
+            // return an empty set.
+            if (tmp_f.empty() && !tmp_s.empty()) {
+                mi.clear();
+                return mi;
+            }
+        }
+        return mi;
+    }
+
+    template <typename T, typename K>
+    bool
+    Cover<T,K>::make_k_cover(std::map<T, std::set<K>>& f, 
+                             const T& key, const size_type& k) const {
+        size_type           num;
+        std::set<K>         nec, opt;
+
+        nec = necessary_elements(f, key);
+        opt = optional_elements(f, key);
+
+        if (nec.size() > k)
+            return false;
+
+        f[key].clear();
+        for (auto &e : nec)
+            f[key].insert(e);
+        for (auto &e : opt)
+            if (f[key].size() == k)
+                break;
+            else
+                f[key].insert(e);
+
+        return true;
+    }
+
+    template <typename T, typename K>
+    std::set<K>
+    Cover<T,K>::necessary_elements(std::map<T, std::set<K>>& f, const T& key) const {
+        std::set<K>    necs;
+
+        for (auto &e : f[key])
+            if (is_necessary(f, key, e))
+                necs.insert(e);
+        return necs;
+    }
+
+    template <typename T, typename K>
+    std::set<K>
+    Cover<T,K>::optional_elements(std::map<T, std::set<K>>& f, const T& key) const {
+        std::set<K>   opts;
+
+        for (auto &e : f[key])
+            if (!is_necessary(f, key, e))
+                opts.insert(e);
+        return opts;
+    }
+
+    template <typename T, typename K>
+    bool
+    Cover<T,K>::is_necessary(std::map<T, std::set<K>>& f, const key_type& key,
+                             const value_type& val) const {
+        for (auto &s : f)
+            if (s.first != key)
+                for (auto &e : s.second)
+                    if (e == val)
+                        return false;
+        return true;
     }
 }
 

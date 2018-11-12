@@ -5,7 +5,7 @@
 
 #include "../src/cover.h"
 
-int main(void) {
+int main() {
     std::uniform_int_distribution<unsigned> u(0, 400);
     std::uniform_int_distribution<unsigned> s(10, 20);
     std::uniform_int_distribution<unsigned> ss(0, 20);
@@ -42,6 +42,15 @@ int main(void) {
     for (auto &c : cvr.minimum_set_cover())
         std::cout << c << ",";
     std::cout << std::endl;
+    std::cout << "k-cover: " << std::endl;
+    for (auto &c : cvr.k_set_cover(3)) {
+        std::cout << "set " << c << ": ";
+        for (auto &e : cvr.family()[c])
+            std::cout << e << " ";
+        std::cout << std::endl;
+    }
+    std::cout << std::endl;
 
     return 0;
 }
+

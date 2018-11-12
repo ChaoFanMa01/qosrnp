@@ -4,7 +4,7 @@
 #include <vector>
 
 #include "../src/header.h"
-#include "../src/c1np.h"
+#include "../src/dc1np.h"
 #include "../src/mysql_api.h"
 #include "../src/miscellaneous.h"
 
@@ -47,7 +47,7 @@ int c1np_test(void) {
             nds.push_back(random_node(qosrnp::node_type::RELAY));
     }
 
-    std::set<qosrnp::size_type> y = qosrnp::c1np(nds);
+    std::set<qosrnp::size_type> y = qosrnp::dc1np(nds);
 
     std::cout << "y_hat: ";
     for (auto &e : y)
