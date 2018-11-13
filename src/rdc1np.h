@@ -104,7 +104,7 @@ namespace qosrnp {
                 try {
                     tmp = cvr.random_k_set_cover(en, DEGREE_CONSTRAINT);
                 } catch (std::range_error err) {
-                    std::cerr << err.what() << std::endl;
+//                    std::cerr << err.what() << std::endl;
                     return std::set<size_type>();
                 }
                 if (tmp.empty())

@@ -5,6 +5,10 @@
 #include <cstdint>      // uintx_t
 
 namespace qosrnp {
+    #define   GENERATION       50
+    #define   POPULATION       10
+    #define   CDL_NUM          400
+
     /* data type of coordinate */
     typedef double        coordinate_type;
     /* data type of ID */
