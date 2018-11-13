@@ -11,7 +11,7 @@ int main() {
     std::uniform_int_distribution<unsigned> ss(0, 20);
     std::uniform_int_distribution<unsigned> f(20, 50);
     std::default_random_engine e(std::time(0));
-    qosrnp::Cover<int, int> cvr;
+    qosrnp::Cover<int, int> cvr, tmp_cvr;
     std::vector<int>     vec;
     int tmp;
 
@@ -37,15 +37,25 @@ int main() {
     for (auto &c : cvr.set())
         std::cout << c << ", ";
     std::cout << std::endl;
+
+    tmp_cvr = cvr;
     
     std::cout << "min: ";
     for (auto &c : cvr.minimum_set_cover())
         std::cout << c << ",";
     std::cout << std::endl;
-    std::cout << "k-cover: " << std::endl;
-    for (auto &c : cvr.k_set_cover(3)) {
+    std::cout << "random k-cover 1: " << std::endl;
+    for (auto &c : cvr.random_k_set_cover(e, 3)) {
         std::cout << "set " << c << ": ";
         for (auto &e : cvr.family()[c])
+            std::cout << e << " ";
+        std::cout << std::endl;
+    }
+    std::cout << std::endl;
+    std::cout << "random k-cover 2: " << std::endl;
+    for (auto &c : tmp_cvr.random_k_set_cover(e, 3)) {
+        std::cout << "set " << c << ": ";
+        for (auto &e : tmp_cvr.family()[c])
             std::cout << e << " ";
         std::cout << std::endl;
     }

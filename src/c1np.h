@@ -13,32 +13,6 @@
 #include "cover.h"
 
 namespace qosrnp {
-    /* @fn max_hop
-     * Find the maximum delta among given destinations from a graph.
-     */
-    hop_type max_hop(const AdjacencyList<Node>& res, 
-                         const std::vector<size_type>& dests) {
-        hop_type max = 0;
-        for (auto &d : dests)
-            if (max < res[d].node()->hop())
-                max = res[d].node()->hop();
-        return max;
-    }
-
-    /* @fn meet_hop
-     * Check whether all destinations on a given graph
-     * meet their hop constraints.
-     * @return true if meet, false otherwise.
-     */
-    bool meet_hop(const AdjacencyList<Node>& al, 
-                    const size_type& src, 
-                    const std::vector<size_type>& dests) {
-        for (auto &i : dests)
-            if (al[i].weight() > al[i].node()->hop())
-                return false;
-          return true;
-    }
-
     std::set<size_type>
     c1np(const Nodes& nds) {
         AdjacencyList<Node> res(nds.begin(), nds.end());

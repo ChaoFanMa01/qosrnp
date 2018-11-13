@@ -19,7 +19,7 @@ namespace qosrnp {
     typedef size_t        size_type;
 
     /* constraint on node degree */
-    const degree_type     DEGREE_CONSTRAINT    = 5;
+    const degree_type     DEGREE_CONSTRAINT    = 10;
     /* constraint on wireless link quality */
     const quality_type    QUALITY_CONSTRAINT   = 0.95;
 }

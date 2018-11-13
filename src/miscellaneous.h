@@ -4,6 +4,7 @@
 #include <linux/types.h>      // ssize_t
 #include <utility>            // move()
 #include <functional>         // less(), less_equal(), ...
+#include <random>
 
 namespace qosrnp {
     // function predeclarations.
@@ -36,6 +37,12 @@ namespace qosrnp {
 
     template <class Iter, class O>
     ssize_t index_of(const Iter&, const Iter&, const O&);
+    // generate a random integer ranging from b to e using
+    // the default random engine.
+    int rand_range(std::default_random_engine&, 
+                   const int&, const int&);
+    double rand_range(std::default_random_engine&,
+                      const double&, const double&);
 
     // function definitions.
     template <class Iter, typename Cmp>
@@ -118,6 +125,20 @@ namespace qosrnp {
             if (*iter == val)
                 return cnt;
         return -1;
+    }
+
+    int
+    rand_range(std::default_random_engine& en, 
+               const int& b, const int& e) {
+        std::uniform_int_distribution<int>   dis(b, e);
+        return dis(en);
+    }
+
+    double 
+    rand_range(std::default_random_engine& en,
+               const double& b, const double& e) {
+        std::uniform_real_distribution<double> dis(b, e);
+        return dis(en);
     }
 }
 

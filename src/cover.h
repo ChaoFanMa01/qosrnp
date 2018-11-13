@@ -5,6 +5,9 @@
 #include <map>
 #include <utility>
 #include <initializer_list>
+#include <random>
+#include <ctime>
+#include <cstdlib>
 
 #include "header.h"
 #include "miscellaneous.h"
@@ -52,10 +55,15 @@ namespace qosrnp {
         // search a minimum k-set cover of _set field using _family field,
         // using the greedy algorithm.
         std::set<key_type> k_set_cover(const size_type&);
+        // search a random k-set cover of _set field using _family field,
+        // using roulette wheel method.
+        std::set<key_type> random_k_set_cover(std::default_random_engine&, const size_type&);
 
     private:
         // return the key of the set with maximal size from given family.
         key_type max_set(std::map<key_type, std::set<value_type>>&) const;
+        // return the key of a random set selected using the roulette wheel method.
+        key_type random_set(std::default_random_engine&, std::map<key_type, std::set<value_type>>&) const;
         // makde a k cover.
         bool make_k_cover(std::map<key_type, std::set<value_type>>&, const key_type&, const size_type&) const;
         // find all the elements only covered by a set with given key.
@@ -64,6 +72,8 @@ namespace qosrnp {
         std::set<value_type> optional_elements(std::map<key_type, std::set<value_type>>&, const key_type&) const;
         // check whether an element is only covered by given set.
         bool is_necessary(std::map<key_type, std::set<value_type>>&, const key_type&, const value_type&) const;
+        bool make_random_k_cover(std::default_random_engine&, std::map<T, std::set<K>>&, 
+                                 const T&, const size_type&) const;
 
     private:
         std::map<key_type, std::set<value_type>>    _family;
@@ -291,6 +301,110 @@ namespace qosrnp {
                 for (auto &e : s.second)
                     if (e == val)
                         return false;
+        return true;
+    }
+
+    template <typename T, typename K>
+    std::set<T>
+    Cover<T,K>::random_k_set_cover(std::default_random_engine& en, 
+                                   const size_type& k) {
+        std::set<T>                  mi;
+        std::set<K>                  tmp_s = _set;
+        std::map<T, std::set<K>>     tmp_f = _family;
+        T                            m;
+
+        while (!tmp_s.empty()) {
+            m = random_set(en, tmp_f);
+            // make this set covers no more k elements.
+            // If we cannot make this successfully, i.e.,
+            // the number of elements covered only by this
+            // set is larger than k, an empty set is returned
+            // to notify that there is no feasible solution
+            // to this instance.
+            if (!make_random_k_cover(en, tmp_f, m, k)) {
+                mi.clear();
+                return mi;
+            }
+            
+            for (auto &f : _family)
+                if (f.first != m)
+                    for (auto &e : tmp_f[m])
+                        f.second.erase(e);
+
+            for (auto &e : tmp_f[m])
+                tmp_s.erase(e);
+            // delete each covered element from remaining cover sets.
+            for (auto &f : tmp_f)
+                if (f.first != m)
+                    for (auto &e : tmp_f[m])
+                        f.second.erase(e);
+            // delete this max set from family.
+            tmp_f.erase(m);
+            // record this max set in the result.
+            mi.insert(m);
+            // if the whole family cannot guarantee a fully set cover,
+            // return an empty set.
+            if (tmp_f.empty() && !tmp_s.empty()) {
+                mi.clear();
+                return mi;
+            }
+        }
+        return mi;
+    }
+
+    template <typename T, typename K>
+    T
+    Cover<T,K>::random_set(std::default_random_engine& en,
+                           std::map<T, std::set<K>>& f) const {
+        size_type size = 0;
+
+        for (auto &s : f)
+            size += s.second.size();
+
+        if (size == 0)
+            throw std::range_error("no feasible set!");
+        
+        std::uniform_int_distribution<int> dis(0, size);
+        int    r = dis(en), i = 0;
+
+        for (auto &s : f) {
+            if (s.second.size() == 0) continue;
+            if (i <= r && r <= i + s.second.size())
+                return s.first;
+            i += s.second.size();
+        }
+
+    }
+
+    template <typename T, typename K>
+    bool
+    Cover<T,K>::make_random_k_cover(std::default_random_engine& en,
+                                    std::map<T, std::set<K>>& f, 
+                                    const T& key, const size_type& k) const {
+        size_type           num;
+        std::set<K>         nec, opt;
+        int                 i, r;
+
+        nec = necessary_elements(f, key);
+        opt = optional_elements(f, key);
+
+        if (nec.size() > k)
+            return false;
+
+        f[key].clear();
+        for (auto &e : nec)
+            f[key].insert(e);
+
+        while (f[key].size() < k && !opt.empty()) {
+            i = 0; r = rand_range(en, 0, opt.size() - 1);
+            for (auto &e : opt)
+                if (i++ == r) {
+                    f[key].insert(e);
+                    opt.erase(e);
+                    break;
+                }
+        }
+
         return true;
     }
 }

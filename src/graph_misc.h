@@ -24,6 +24,12 @@ namespace qosrnp {
 
     template <class C>
     bool has_edge(const Edge<C>&, const std::vector<Edge<C>>&);
+    
+    hop_type max_hop(const AdjacencyList<Node>&, 
+                     const std::vector<size_type>&);
+
+    bool meet_hop(const AdjacencyList<Node>&, const size_type&, 
+                  const std::vector<size_type>&);
 
     /* @fn breadth_first_traverse()
      *
@@ -236,6 +242,32 @@ namespace qosrnp {
             }
         }
         return spt;
+    }
+    
+    /* @fn max_hop
+     * Find the maximum delta among given destinations from a graph.
+     */
+    hop_type max_hop(const AdjacencyList<Node>& res, 
+                         const std::vector<size_type>& dests) {
+        hop_type max = 0;
+        for (auto &d : dests)
+            if (max < res[d].node()->hop())
+                max = res[d].node()->hop();
+        return max;
+    }
+
+    /* @fn meet_hop
+     * Check whether all destinations on a given graph
+     * meet their hop constraints.
+     * @return true if meet, false otherwise.
+     */
+    bool meet_hop(const AdjacencyList<Node>& al, 
+                    const size_type& src, 
+                    const std::vector<size_type>& dests) {
+        for (auto &i : dests)
+            if (al[i].weight() > al[i].node()->hop())
+                return false;
+          return true;
     }
 }
 
