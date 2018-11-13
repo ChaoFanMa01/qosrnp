@@ -15,7 +15,7 @@
 
 namespace qosrnp {
     std::set<size_type>
-    rdc1np(std::default_random_engine& en, const Nodes& nds) {
+    rdc1np(std::default_random_engine& en, const std::vector<Node *>& nds) {
         AdjacencyList<Node> res(nds.begin(), nds.end());
         
         size_type src;

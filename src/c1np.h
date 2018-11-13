@@ -14,7 +14,7 @@
 
 namespace qosrnp {
     std::set<size_type>
-    c1np(const Nodes& nds) {
+    c1np(const std::vector<Node *>& nds) {
         AdjacencyList<Node> res(nds.begin(), nds.end());
         
         size_type src;

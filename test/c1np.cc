@@ -47,7 +47,9 @@ int c1np_test(void) {
             nds.push_back(random_node(qosrnp::node_type::RELAY));
     }
 
-    std::set<qosrnp::size_type> y = qosrnp::c1np(nds);
+    std::vector<qosrnp::Node*> nodes(nds.begin(), nds.end());
+
+    std::set<qosrnp::size_type> y = qosrnp::c1np(nodes);
 
     std::cout << "y_hat: ";
     for (auto &e : y)
@@ -55,7 +57,7 @@ int c1np_test(void) {
     std::cout <<  std::endl;
     std::cout << "size: " << y.size() << std::endl;
 
-    qosrnp::AdjacencyList<qosrnp::Node> al(nds.begin(), nds.end());
+    qosrnp::AdjacencyList<qosrnp::Node> al(nodes.begin(), nodes.end());
     if (!mysql.write_adjacency_list(al))
         std::cout << "mysql error!" << std::endl;
     else

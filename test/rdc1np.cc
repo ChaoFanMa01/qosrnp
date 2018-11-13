@@ -4,6 +4,7 @@
 #include <vector>
 
 #include "../src/header.h"
+#include "../src/dc1np.h"
 #include "../src/rdc1np.h"
 #include "../src/mysql_api.h"
 #include "../src/miscellaneous.h"
@@ -46,22 +47,24 @@ int c1np_test(void) {
         else
             nds.push_back(random_node(qosrnp::node_type::RELAY));
     }
-
-    std::set<qosrnp::size_type> y = qosrnp::rdc1np(e, nds);
-
-    std::cout << "y_hat: ";
+    {std::vector<qosrnp::Node*> nodes(nds.begin(), nds.end());
+    std::set<qosrnp::size_type> y = qosrnp::dc1np(nodes);
+/*    std::cout << "y_hat: ";
     for (auto &e : y)
         std::cout << e << ", ";
-    std::cout <<  std::endl;
-    std::cout << "size: " << y.size() << std::endl;
+    std::cout <<  std::endl;*/
+    std::cout << "dc1np size: " << y.size() << std::endl;}
+    
+    for (int i = 0; i < 50; ++i) {
+        std::vector<qosrnp::Node*> nodes(nds.begin(), nds.end());
+        std::set<qosrnp::size_type> y = qosrnp::rdc1np(e, nodes);
+/*        std::cout << "y_hat: ";
+        for (auto &e : y)
+            std::cout << e << ", ";
+        std::cout <<  std::endl;*/
+        std::cout << "rdc1np size: " << y.size() << std::endl;
+    }
 
-    qosrnp::AdjacencyList<qosrnp::Node> al(nds.begin(), nds.end());
-    if (!mysql.write_adjacency_list(al))
-        std::cout << "mysql error!" << std::endl;
-    else
-        std::cout << "mysql done." << std::endl;
-
-    std::cout << "c1np over..." << std::endl;
     return 0;
 }
 
