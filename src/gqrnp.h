@@ -25,6 +25,7 @@ namespace qosrnp {
     void make_cross_poll(std::vector<Node*>&, const std::set<size_type>&, 
                          const std::set<size_type>&);
     bool is_in_set(const size_type&, const std::set<size_type>&);
+    double average_hop(const std::vector<Node*>&, const std::set<size_type>&);
 
     /* @fn gqrnp()
      *
@@ -63,7 +64,8 @@ namespace qosrnp {
         }
 
         update_optimal(optimal, population);
-        std::cout << "current optimal: " << optimal.size() << std::endl;
+        std::cout << "current optimal: " << optimal.size();
+        std::cout << ", average hop: " << average_hop(nds, optimal) << std::endl;
 
         // reproduce
         for (int i = 0; i < GENERATION; ++i) {
@@ -109,7 +111,8 @@ namespace qosrnp {
             population = current;
             // update optimal solution.
             update_optimal(optimal, population);
-            std::cout << "current optimal: " << optimal.size() << std::endl;
+            std::cout << "current optimal: " << optimal.size();
+            std::cout << ", average hop: " << average_hop(nds, optimal) << std::endl;
         }
         return optimal;
     }
@@ -168,6 +171,29 @@ namespace qosrnp {
             if (n == e)
                 return true;
         return false;
+    }
+
+    double 
+    average_hop(const std::vector<Node*>& nds, const std::set<size_type>& rns) {
+        for (auto &n : nds) {
+            n->set_power(qosrnp::power);
+            if (n->type() == qosrnp::node_type::SENSOR)
+                n->set_hop(qosrnp::hop_constraint);
+            else 
+                n->set_hop(9999);
+        }
+        std::vector<Node*>  tmp_nds = nds;
+        make_cross_poll(tmp_nds, rns, std::set<size_type>());
+        AdjacencyList<Node> al(tmp_nds.begin(), tmp_nds.end());
+        std::vector<size_type>    dests;
+        double                 hop = 0.0;
+        for (auto &n : nds)
+            if (n->type() == node_type::SENSOR)
+                dests.push_back(n->id());
+        dijkstra_spt(al, 0, dests);
+        for (auto &d : dests)
+            hop += al[d].weight();
+        return hop / dests.size();
     }
 }
 #endif

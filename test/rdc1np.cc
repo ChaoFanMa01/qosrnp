@@ -16,6 +16,14 @@ std::uniform_int_distribution<unsigned> delta(10, 20);
 std::default_random_engine e(std::time(0));
 qosrnp::id_type id = 0;
 
+bool
+is_contain(qosrnp::size_type id, std::set<qosrnp::size_type>& s) {
+    for (auto &e : s)
+        if (e == id)
+            return true;
+    return false;
+}
+
 qosrnp::Node*
 random_node(qosrnp::node_type t) {
     switch(t) {
@@ -55,7 +63,7 @@ int c1np_test(void) {
     std::cout <<  std::endl;*/
     std::cout << "dc1np size: " << y.size() << std::endl;}
     
-    for (int i = 0; i < 50; ++i) {
+//    for (int i = 0; i < 50; ++i) {
         std::vector<qosrnp::Node*> nodes(nds.begin(), nds.end());
         std::set<qosrnp::size_type> y = qosrnp::rdc1np(e, nodes);
 /*        std::cout << "y_hat: ";
@@ -63,10 +71,27 @@ int c1np_test(void) {
             std::cout << e << ", ";
         std::cout <<  std::endl;*/
         std::cout << "rdc1np size: " << y.size() << std::endl;
-    }
+//    }
+    std::vector<qosrnp::Node*> res(nds.begin(), nds.end());
+
+    for (auto &n : res)
+        if (n->type() != qosrnp::node_type::SINK &&
+            n->type() != qosrnp::node_type::SENSOR &&
+            !is_contain(n->id(), y))
+            n->set_power(0.0);
+     qosrnp::AdjacencyList<qosrnp::Node> al(res.begin(), res.end());
+     std::vector<qosrnp::size_type> dests;
+     for (auto &n : res)
+         if(n->type() == qosrnp::node_type::SENSOR)
+             dests.push_back(n->id());
+     if (!mysql.write_adjacency_list(qosrnp::dijkstra_spt(al, 0, dests)))
+         std::cout << "mysql error!" << std::endl;
+     else
+         std::cout << "mysql done." << std::endl;
 
     return 0;
 }
+
 
 int main(void) {
     c1np_test();
