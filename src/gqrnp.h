@@ -13,6 +13,7 @@
 #include "graph.h"
 #include "graph_misc.h"
 #include "cover.h"
+#include "dc1np.h"
 #include "rdc1np.h"
 
 namespace qosrnp {
@@ -21,8 +22,9 @@ namespace qosrnp {
     void calculate_fitness(std::vector<std::set<size_type>>&, std::vector<unsigned>&);
     size_type fitness(const std::set<size_type>&);
     size_type random_chromosome(std::default_random_engine&, std::vector<unsigned>&);
-    void make_cross_poll(std::vector<Node*>&, const std::vector<Node*>&, 
-                         std::set<size_type>, std::set<size_type>);
+    void make_cross_poll(std::vector<Node*>&, const std::set<size_type>&, 
+                         const std::set<size_type>&);
+    bool is_in_set(const size_type&, const std::set<size_type>&);
 
     /* @fn gqrnp()
      *
@@ -38,14 +40,22 @@ namespace qosrnp {
         // generate initial population.
         for (int i = 0; i < POPULATION; ) {
             try {
+                for (auto &n : nds) {
+                    n->set_power(qosrnp::power);
+                    if (n->type() == qosrnp::node_type::SENSOR)
+                        n->set_hop(qosrnp::hop_constraint);
+                    else 
+                        n->set_hop(9999);
+                }
                 std::vector<Node*>    nodes(nds.begin(), nds.end());
-                tmp = rdc1np(en, nodes);
-                std::cout << "building..." << std::endl;
+                if (i == 0)
+                    tmp = dc1np(nodes);
+                else
+                    tmp = rdc1np(en, nodes);
             } catch (std::range_error e) {
                 continue;
             }
             if (!tmp.empty()) {
-                std::cout << "tmp size: " << tmp.size() << std::endl;
                 population.push_back(tmp);
                 ++i;
             }
@@ -68,18 +78,25 @@ namespace qosrnp {
             
             // crossover process.
             for (int j = 0; j < POPULATION; j += 2) {
-                std::vector<Node*>      cross_poll;
-                std::cout << "mediate size: " << mediate.size() << ", j=" << j << std::endl;
-                make_cross_poll(cross_poll, nds, mediate[j], mediate[j + 1]);
                 for (int k = 0; k < 2; ) {
                     try {
-                        std::cout << "trying" << std::endl;
-                        tmp = rdc1np(en, cross_poll);
+                        for (auto &n : nds) {
+                            n->set_power(qosrnp::power);
+                            if (n->type() == qosrnp::node_type::SENSOR)
+                                n->set_hop(qosrnp::hop_constraint);
+                            else 
+                                n->set_hop(9999);
+                        }
+                        std::vector<Node*>      cross_poll(nds.begin(), nds.end());
+                        make_cross_poll(cross_poll, mediate[j], mediate[j + 1]);
+                        if (k == 0)
+                            tmp = dc1np(cross_poll);
+                        else
+                            tmp = rdc1np(en, cross_poll);
                     } catch (std::range_error e) {
                         continue;
                     }
                     if (!tmp.empty()) {
-                        std::cout << "trying over" << std::endl;
                         current.push_back(tmp);
                         ++k;
                     }
@@ -99,7 +116,6 @@ namespace qosrnp {
 
     void
     update_optimal(std::set<size_type>& op, std::vector<std::set<size_type>>& popu) {
-        std::cout << "update optimal" << std::endl;
         for (auto &ch : popu)
             if (op.size() == 0)
                 op = ch;
@@ -111,7 +127,6 @@ namespace qosrnp {
 
     void
     calculate_fitness(std::vector<std::set<size_type>>& po, std::vector<unsigned>& rw) {
-        std::cout << "calculate fitness" << std::endl;
         for (int i = 0; i < po.size(); ++i)
             if (i == 0)
                 rw.push_back(fitness(po[i]));
@@ -128,7 +143,6 @@ namespace qosrnp {
     random_chromosome(std::default_random_engine& e, std::vector<unsigned>& rw) {
         std::uniform_int_distribution<unsigned>  u(0, rw.back());
         unsigned                                 r = u(e);
-        std::cout << "random chromosome" << std::endl;
 
         for (int i = 0; i < rw.size(); ++i)
             if (r <= rw[i])
@@ -136,29 +150,24 @@ namespace qosrnp {
     }
 
     void
-    make_cross_poll(std::vector<Node*>& cp, const std::vector<Node*>& total, 
-                    std::set<size_type> p1, std::set<size_type> p2) {
+    make_cross_poll(std::vector<Node*>& cp, const std::set<size_type>& p1, 
+                    const std::set<size_type>& p2) {
         std::set<size_type>    pp;
-        std::cout << "make cross poll" << std::endl;
 
-        std::cout << "poll over" << std::endl;
+        for (auto &n : cp)
+            if ((n->type() != node_type::SINK) && 
+                (n->type() != node_type::SENSOR) &&
+                !(is_in_set(n->id(), p1) || is_in_set(n->id(), p2))) {
+                n->set_power(0.0);
+            }
+    }
 
-        for (auto e : p1)
-            pp.insert(e);
-        for (auto e : p2)
-            pp.insert(e);
-
-        std::cout << "poll over" << std::endl;
-        for (auto &n : total)
-            if (n->type() != node_type::RELAY)
-                cp.push_back(n);
-            else
-                break;
-
-        std::cout << "poll over" << std::endl;
-        for (auto &e : pp)
-            cp.push_back(total[e]);
-        std::cout << "poll over" << std::endl;
+    bool
+    is_in_set(const size_type& n, const std::set<size_type>& s) {
+        for (auto &e : s)
+            if (n == e)
+                return true;
+        return false;
     }
 }
 #endif

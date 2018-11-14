@@ -73,7 +73,7 @@ namespace qosrnp {
             // and relays, in their weight fields.
             spt = dijkstra_spt(res, src, dests);
         } catch (std::range_error e) {
-            std::cerr << e.what() << std::endl;
+//            std::cerr << e.what() << std::endl;
             return std::set<size_type>();
         }
 

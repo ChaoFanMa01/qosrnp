@@ -39,26 +39,42 @@ int c1np_test(void) {
 
     mysql.query("DELETE FROM graph");
     
-    for (int i = 0; i < 441; ++i) {
-        if (i < 1) 
+    for (int i = 0; i < qosrnp::sink_num + qosrnp::sensor_num + qosrnp::relay_num; ++i) {
+        if (i < qosrnp::sink_num) 
             nds.push_back(random_node(qosrnp::node_type::SINK));
-        else if (i < 41)
+        else if (i < qosrnp::sink_num + qosrnp::sensor_num)
             nds.push_back(random_node(qosrnp::node_type::SENSOR));
         else
             nds.push_back(random_node(qosrnp::node_type::RELAY));
     }
-    {std::vector<qosrnp::Node*> nodes(nds.begin(), nds.end());
+    
+    {
+    std::vector<qosrnp::Node*> nodes(nds.begin(), nds.end());
     std::set<qosrnp::size_type> y = qosrnp::dc1np(nodes);
+    std::cout << "dc1np size: " << y.size() << std::endl;
+    }
+
+    for (auto &n : nds) {
+        n->set_power(qosrnp::power);
+        if (n->type() == qosrnp::node_type::SENSOR)
+            n->set_hop(qosrnp::hop_constraint);
+        else 
+            n->set_hop(9999);
+    }
+
 /*    std::cout << "y_hat: ";
     for (auto &e : y)
         std::cout << e << ", ";
     std::cout <<  std::endl;*/
-    std::cout << "dc1np size: " << y.size() << std::endl;}
     
     std::vector<qosrnp::Node*> nodes(nds.begin(), nds.end());
+/*    for (auto &n : nodes)
+        std::cout << "hop: " << n->hop()
+                  << ", power: " << n->power() << std::endl;
+*/
     std::set<qosrnp::size_type> y = qosrnp::gqrnp(e, nodes);
     std::cout << "gqrnp size: " << y.size() << std::endl;
-    
+
     return 0;
 }
 

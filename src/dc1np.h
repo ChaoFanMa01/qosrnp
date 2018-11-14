@@ -59,7 +59,8 @@ namespace qosrnp {
         // if cannot build such graph, try to build with relays.
         } catch (std::range_error e) {
 #if !defined(NDEBUG)
-             std::cerr << e.what() << std::endl;
+               ;
+//             std::cerr << e.what() << std::endl;
 #endif
         }
 

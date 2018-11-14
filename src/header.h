@@ -5,7 +5,7 @@
 #include <cstdint>      // uintx_t
 
 namespace qosrnp {
-    #define   GENERATION       50
+    #define   GENERATION       200
     #define   POPULATION       10
     #define   CDL_NUM          400
 
@@ -26,6 +26,13 @@ namespace qosrnp {
     const degree_type     DEGREE_CONSTRAINT    = 10;
     /* constraint on wireless link quality */
     const quality_type    QUALITY_CONSTRAINT   = 0.95;
+
+    unsigned int     sensor_num = 40;
+    unsigned int     sink_num = 1;
+    unsigned int     relay_num = 400;
+
+    double           power = 10.0;
+    unsigned int     hop_constraint = 15;
 }
 
 #endif
