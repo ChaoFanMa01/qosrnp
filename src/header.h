@@ -27,11 +27,11 @@ namespace qosrnp {
     /* constraint on wireless link quality */
     const quality_type    QUALITY_CONSTRAINT   = 0.95;
 
-    unsigned int     sensor_num = 40;
+    unsigned int     sensor_num = 100;
     unsigned int     sink_num = 1;
     unsigned int     relay_num = 400;
 
-    double           power = 10.0;
+    double           power = 20.0;
     unsigned int     hop_constraint = 15;
 }
 
