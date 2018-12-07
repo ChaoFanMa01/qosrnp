@@ -225,6 +225,7 @@ namespace qosrnp {
                 neis += "\"";
 
             q += neis + ");";
+            std::cout << q << std::endl;
             if (!query(q.c_str()))
                 return false;
         }
